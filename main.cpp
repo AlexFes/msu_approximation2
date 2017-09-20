@@ -4,15 +4,12 @@
 #include <QAction>
 #include <QMenuBar>
 #include <QMessageBox>
-#include <fenv.h>
 #include "window.h"
 #include <stdio.h>
 
 int main (int argc, char *argv[]) {
 
     QApplication app (argc, argv);
-
- // feenableexcept (FE_INVALID | FE_DIVBYZERO | FE_OVERFLOW | FE_UNDERFLOW);
 
     QMainWindow *window = new QMainWindow;
 

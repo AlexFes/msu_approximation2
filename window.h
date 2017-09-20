@@ -16,21 +16,7 @@
 #include <vector>
 
 struct args;
-/*
-enum vertex_pos
-{
-  bottom_left_x = 0,
-  bottom_left_y,
-  top_left_x,
-  top_left_y,
-  top_right_x,
-  top_right_y,
-  bottom_right_x,
-  bottom_right_y,
 
-  vertex_pos_COUNT
-};
-*/
 class Scene3D : public QGLWidget {
 
 public:
@@ -56,8 +42,6 @@ private:
     void fill_vertex_array (std::vector<GLfloat> &VertexArray,
                             double *x, double *func,
                             int index1, int index2, int index3);
-//  void fill_vertex_array_half_points (std::vector<GLfloat> &VertexArray, int status, int index1,
-//                                      int index2, int index3);
 
     void getVertexArray (std::vector<GLfloat> &VertexArray, double *func,
                          double *x, int status);
@@ -73,45 +57,8 @@ protected:
     void mouseMoveEvent(QMouseEvent* pe);
     void mouseReleaseEvent(QMouseEvent*);
     void wheelEvent(QWheelEvent* pe);
-  //void keyPressEvent(QKeyEvent* pe);
 
 private:
-
-/*
-  double vertices[vertex_pos_COUNT]; //vertices
-  std::vector<double> points;               //points
-  std::vector<double> half_points;          //halfs
-  std::vector<double> func;                 //function
-  std::vector<double> x;                    //answer
-  int N;                        //how many triangulations
-  int N_2;                       //2^N
-  int p;                        //threads
-  int P;                        //points
-  int all_triangles;            //triangles
-  double (*f) (double, double); //function
-  int what_to_draw;             //what_to_draw
-  double max_function;
-  double max_residual;
-  struct ellipse_paramteres
-  {
-    double x_center;
-    double y_center;
-    double a;
-    double b;
-  } ellipse_params;
-
-  std::vector<GLfloat> VertexArray_real;
-  std::vector<GLfloat> VertexArray_residual;
-  std::vector<GLfloat> VertexArray_appr;
-  GLfloat xRot;
-  GLfloat yRot;
-  GLfloat zRot;
-  GLfloat zTra;
-  GLfloat nSca;
-
-  QPoint ptrMousePosition;
-*/
-                            ///MA MAN
     int t;      //threads
     int n;      //number of "x" points
     int m;      //number of "y" points

@@ -9,7 +9,6 @@ void Scene3D::initializeGL() {
     glShadeModel (GL_FLAT);
 }
 
-///DANGER
 void Scene3D::resizeGL (int nWidth, int nHeight) {
 
     glMatrixMode (GL_PROJECTION);
@@ -71,79 +70,7 @@ void Scene3D::wheelEvent(QWheelEvent* pe) {
 
     updateGL();
 }
-/*
-void Scene3D::keyPressEvent(QKeyEvent* pe)
-{
-  switch (pe->key ())
-    {
-      case Qt::Key_Equal:
-        scale_plus();
-        break;
 
-      case Qt::Key_Minus:
-        scale_minus ();
-        break;
-
-      case Qt::Key_W:
-        rotate_up ();
-        break;
-
-      case Qt::Key_S:
-        rotate_down ();
-        break;
-
-      case Qt::Key_A:
-        rotate_left ();
-        break;
-
-      case Qt::Key_D:
-          rotate_right ();
-        break;
-
-      case Qt::Key_Q:
-        translate_down ();
-        break;
-
-      case Qt::Key_E:
-        translate_up ();
-        break;
-
-      case Qt::Key_Space:
-        defaultScene ();
-        break;
-
-      case Qt::Key_Escape:
-        this->close ();
-        return;
-
-      case Qt::Key_1:
-        what_to_draw++;
-        if (what_to_draw == 2)
-          what_to_draw = 0;
-        break;
-
-      case Qt::Key_2:
-        N++;
-        N_2 *= 2;
-        N_2 *= 2;
-        recount_algorithm ();
-        break;
-      case Qt::Key_3:
-        if (N > 1)
-          {
-            N--;
-            N_2 /= 2;
-            N_2 /= 2;
-            recount_algorithm ();
-          }
-        break;
-      default:
-        return;
-    }
-
-  updateGL ();
-}
-*/
 void Scene3D::scale_plus()
 {
   nSca = nSca * 1.1;
