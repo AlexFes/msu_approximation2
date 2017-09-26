@@ -7,6 +7,8 @@
 ///Multithread
 void Scene3D::recount_algorithm () {
 
+    //get_cut(0.4, 0.3, 0.4, 0.5);
+
     pthread_t tid;
 
     update_arrays();
@@ -43,9 +45,11 @@ void Scene3D::recount_algorithm () {
 
     use_algorithm (arg + 0);
 
-    //getVertexArray (VertexArray_real, func.data (), 0, 0);
+//  getVertexArray (VertexArray_real, func, 0, 0);
     getVertexArray (VertexArray_appr, x, 0, 1);
-    //getVertexArray (VertexArray_residual, func.data (), x.data (), 2);
+    getVertexArray (VertexArray_residual, func, x, 2);
+
+    delete[] arg;
 
     updateGL();
 }
@@ -65,10 +69,8 @@ void Scene3D::get_points () {
                 points[num*2 + 1] = y1 + hy*j;
             }
 
-    for (int i = 0; i < n*m - (d_x-1)*(d_y-1); i++) {
+    for (int i = 0; i < n*m - (d_x-1)*(d_y-1); i++)
         func[i] = f(points[i*2], points[i*2+1]);
-        b[i] = func[i];
-    }
 }
 
 ///Push back a point
@@ -79,7 +81,7 @@ void Scene3D::fill_vertex_array (std::vector<GLfloat> &VertexArray,
     VertexArray.push_back (points[2*index1 + 1]);
 
     if (x)
-        VertexArray.push_back (func[index1] - x[index2]);
+        VertexArray.push_back (1e+14*fabs(func[index1] - x[index1]));
 
     else
         VertexArray.push_back (func[index1]);
@@ -88,7 +90,7 @@ void Scene3D::fill_vertex_array (std::vector<GLfloat> &VertexArray,
     VertexArray.push_back (points[2*index2 + 1]);
 
     if (x)
-        VertexArray.push_back (func[index2] - x[index2]);
+        VertexArray.push_back (1e+14*fabs(func[index2] - x[index2]));
 
     else
         VertexArray.push_back (func[index2]);
@@ -97,7 +99,7 @@ void Scene3D::fill_vertex_array (std::vector<GLfloat> &VertexArray,
     VertexArray.push_back (points[2*index3 + 1]);
 
     if (x)
-        VertexArray.push_back (func[index3] - x[index3]);
+        VertexArray.push_back (1e+14*fabs(func[index3] - x[index3]));
 
     else
         VertexArray.push_back (func[index3]);
@@ -136,8 +138,39 @@ void Scene3D::getVertexArray (std::vector<GLfloat> &VertexArray,
 
     if (status == 2) {
         max_residual = max;
-        printf ("Max residual = %e\n", max_residual);
+        printf ("Max residual = %e\n", 1e-14*max_residual);
+        //qDebug() << "Max residual = " << max_residual;
     }
+}
+
+///Get the cut
+void Scene3D::get_cut(double X, double Y, double dX, double dY) {
+
+    double hx = (x2-x1)/(n-1), hy = (y2-y1)/(m-1);
+
+    p = (int) trunc ((X - x1)/hx);
+    if (p == 0)
+        ++p;
+    else if (p >= n-2)
+        p = n-3;
+
+    q = (int) trunc ((Y - y1)/hy);
+    if (q == 0)
+        q++;
+    else if (q >= m-2)
+        q = m-3;
+
+    d_x = (int) trunc (dX/hx);
+    if (p + d_x >= n - 1)
+        d_x = n - 2 - p;
+    else if (d_x == 0)
+        d_x = 1;
+
+    d_y = (int) trunc (dY/hy);
+    if (q + d_y >= m - 1)
+        d_y = m - 2 - q;
+    else if (d_y == 0)
+        d_y = 1;
 }
 
 ///Free memory
@@ -163,10 +196,14 @@ void Scene3D::update_arrays () {
     x = new double [n*m - (d_x-1)*(d_y-1)];
     func = new double [n*m - (d_x-1)*(d_y-1)];
     points = new double [2*(n*m - (d_x-1)*(d_y-1))];
-    A = new double [(n*m - (d_x-1)*(d_y-1))*
-                    (n*m - (d_x-1)*(d_y-1))];
-    I = new int [(n*m - (d_x-1)*(d_y-1))*
-                 (n*m - (d_x-1)*(d_y-1))];
+    A = new double [n*m - (d_x-1)*(d_y-1) + 1 +
+            ((n-2)*(m-2) - (d_x+1)*(d_y+1))*6
+            + ((n-2) + (d_x-1) + (m-2) + (d_y-1))*4*2
+            + 2*3 + 2*2 + 2*6 + 2*5];
+    I = new int [n*m - (d_x-1)*(d_y-1) + 1 +
+            ((n-2)*(m-2) - (d_x+1)*(d_y+1))*6
+            + ((n-2) + (d_x-1) + (m-2) + (d_y-1))*4*2
+            + 2*3 + 2*2 + 2*6 + 2*5];
     b = new double [n*m - (d_x-1)*(d_y-1)];
 }
 

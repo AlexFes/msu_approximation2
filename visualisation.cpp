@@ -10,8 +10,10 @@ static double f_0 (double x, double y) {
     (void)x;
     (void)y;
 
-    return sqrt (x*x + y*y);
-    //return x + y;
+    //return 1;
+    //return exp (x*x - y*y);
+    //return sqrt (x*x + y*y);
+    return x + y;
 }
 
 void Scene3D::paintGL () {
@@ -29,7 +31,7 @@ void Scene3D::paintGL () {
     glMatrixMode (GL_MODELVIEW);
     glLoadIdentity();
 
-    glScalef (nSca/max_function, nSca/max_function, nSca/max_function);
+    glScalef (nSca, nSca, nSca);
     glTranslatef (0.0f, zTra, 0.0f);
     glRotatef (xRot, 1.0f, 0.0f, 0.0f);
     glRotatef (yRot, 0.0f, 1.0f, 0.0f);
@@ -112,6 +114,12 @@ Scene3D::Scene3D (QWidget* parent) : QGLWidget(parent) {
     what_to_draw = 0;
     max_function = 1.;
     max_residual = 1.;
+    x = 0;
+    func = 0;
+    points = 0;
+    A = 0;
+    I = 0;
+    b = 0;
 }
 
 Scene3D::~Scene3D () {

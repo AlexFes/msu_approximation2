@@ -18,16 +18,18 @@ int Scene3D::input_values (int argc, char *argv[]) {
     }
 
     x1 = y1 = 0;
-    x2 = y2 = 7;
+    x2 = y2 = 4;
 
-    n = 50;
-    m = 55;
+    n = 5;
+    m = 5;
 
-    p = 10;
-    d_x = 11;
+    p = 1;
+    q = 1;
 
-    q = 7;
-    d_y = 8;
+    d_x = 2;
+    d_y = 2;
+
+    what_to_draw = 0;
 
     recount_algorithm ();
 
