@@ -6,9 +6,10 @@
 
 struct args {
 
-    double *A, *b, *x, *func;
+    double *A, *b, *x, *func, *points;
     int *I;
-    int x1, y1, x2, y2, n, m, p, q, d_x, d_y, t, k;
+    int n, m, p, q, d_x, d_y, t, k;
+    double x1, y1, x2, y2;
     double (*f)(double, double);
 };
 
@@ -35,8 +36,17 @@ int fill_matrix (int n, int m, int p, int q,
 int fill_matrix_structure (int n, int m, int p, int q,
                            int d_x, int d_y, int *I);
 void fill_vector_b (int n, int m, int p, int q,
-                    int d_x, int d_y, double s,
-                    double *b, double *func);
+                    int d_x, int d_y, int k, int t, double s,
+                    double *b, double (*f) (double, double),
+                    double *points);
+void integral (int m, int p, int q,
+               int d_x, int d_y, double s,
+               double *b, double (*f) (double, double),
+               double *points,
+               int i1, int j1, int i2, int j2, int i3, int j3, int flag);
+//void fill_vector_b (int n, int m, int p, int q,
+//                    int d_x, int d_y, double s,
+//                    double *b, double *func);
 int get_links (int i, int j, int n, int m,
                int p, int q, int d_x, int d_y,
                int *x, int *y);

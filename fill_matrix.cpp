@@ -1,4 +1,7 @@
 #include "algorithm.h"
+#include <math.h>
+#include <stdlib.h>
+#include <stdio.h>
 
 ///Close points on the plane
 int get_links (int i, int j, int n, int m,
@@ -403,8 +406,8 @@ int fill_matrix (int n, int m, int p, int q,
             break;
         }
 
-        for (int w = 0; w < nz; w++) {
-            A[I[l] + w] = a[w + 1];}
+        for (int w = 0; w < nz; w++)
+            A[I[l] + w] = a[w + 1];
     }
 
     if (I[n*m - (d_x-1)*(d_y-1)] != n*m - (d_x-1)*(d_y-1) + 1 +
@@ -418,11 +421,194 @@ int fill_matrix (int n, int m, int p, int q,
 
 ///Vector b = (f, phi)
 void fill_vector_b (int n, int m, int p, int q,
+                    int d_x, int d_y, int k, int t, double s,
+                    double *b, double (*f) (double, double),
+                    double *points) {
+
+    int i, j, v;
+
+    int i1 = k*(n*m - (d_x-1)*(d_y-1))/t;
+    int i2 = (k + 1)*(n*m - (d_x-1)*(d_y-1))/t;
+
+    int x[6], y[6];
+
+    ///Four triangles
+    for (int l = i1; l < i2; ++l) {
+        get_ij (i, j, m, p, q, d_x, d_y, l);
+        v = get_links (i, j, n, m, p, q, d_x, d_y, x, y);
+
+        ///Locate all triangles
+        for (int vertex = 0; vertex < v-1; ++vertex) {
+            if (y[vertex+1] - y[vertex] == 1 ||
+                (y[vertex+1] - j == 1 && x[vertex+1]!=x[vertex]))
+                integral (m, p, q, d_x, d_y, s, b, f, points,
+                          i, j, x[vertex], y[vertex], x[vertex+1], y[vertex+1], 1);
+
+            if (vertex!=v-2 && (y[vertex+2] - y[vertex] == 1 ||
+                abs(y[vertex+2] - j) == 1))
+                integral (m, p, q, d_x, d_y, s, b, f, points,
+                          i, j, x[vertex], y[vertex], x[vertex+2], y[vertex+2], 0);
+        }
+    }
+
+
+//    ///debug
+//    printf("\n");
+//    for (int i = 0; i < n*m - (d_x-1)*(d_y-1); ++i) printf(" %.2e ", b[i]);
+
+}
+
+///Calculate four integrals
+void integral (int m, int p, int q,
+               int d_x, int d_y, double s,
+               double *b, double (*f) (double, double),
+               double *points,
+               int i1, int j1, int i2, int j2, int i3, int j3, int flag) {
+
+    ///Main points
+    double x1 = 0, x2 = 0, x3 = 0,
+           y1 = 0, y2 = 0, y3 = 0;
+
+    ///Middle points
+    double x4, x5, x6,
+           y4, y5, y6;
+
+    ///Values
+    double f1 = 0, f2 = 0, f3 = 0, f4, f5, f6,
+           g1 = 0, g2 = 0, g3 = 0, g4 = 0.5, g5 = 0.5, g6 = 0.5;
+
+    int num = 0, num1, num2;
+                            ///Recognising the triangle
+    ///First type
+    if (flag && i2==i3) {
+        num1 = get_num (i2, j2, m, p, q, d_x, d_y);
+        num2 = get_num (i3, j3, m, p, q, d_x, d_y);
+
+        if (i1 > i2) {
+            x1 = points[num2*2];
+            y1 = points[num2*2 + 1];
+
+            x3 = points[num1*2];
+            y3 = points[num1*2 + 1];
+        }
+
+        else {
+            x1 = points[num1*2];
+            y1 = points[num1*2 + 1];
+
+            x3 = points[num2*2];
+            y3 = points[num2*2 + 1];
+        }
+
+        num = get_num (i1, j1, m, p, q, d_x, d_y);
+        x2 = points[num*2];
+        y2 = points[num*2 + 1];
+
+        f1 = f(x1, y1);
+        f2 = f(x2, y2);
+        f3 = f(x3, y3);
+        g2 = 1;
+        g5 = 0;
+    }
+
+    ///Second type
+    if (!flag && j2==j3) {
+        num1 = get_num (i2, j2, m, p, q, d_x, d_y);
+        num2 = get_num (i3, j3, m, p, q, d_x, d_y);
+
+        if (j1 > j2) {
+            x1 = points[num2*2];
+            y1 = points[num2*2 + 1];
+
+            x2 = points[num1*2];
+            y2 = points[num1*2 + 1];
+        }
+
+        else {
+            x1 = points[num1*2];
+            y1 = points[num1*2 + 1];
+
+            x2 = points[num2*2];
+            y2 = points[num2*2 + 1];
+        }
+
+        num = get_num (i1, j1, m, p, q, d_x, d_y);
+        x3 = points[num*2];
+        y3 = points[num*2 + 1];
+
+        f1 = f(x1, y1);
+        f2 = f(x2, y2);
+        f3 = f(x3, y3);
+        g3 = 1;
+        g4 = 0;
+    }
+
+    ///Third type
+    if ((!flag && j2!=j3) || (flag && i2!=i3)) {
+        num1 = get_num (i2, j2, m, p, q, d_x, d_y);
+        num2 = get_num (i3, j3, m, p, q, d_x, d_y);
+
+        if (j1==j2) {
+            x3 = points[num2*2];
+            y3 = points[num2*2 + 1];
+
+            x2 = points[num1*2];
+            y2 = points[num1*2 + 1];
+        }
+
+        else {
+            x3 = points[num1*2];
+            y3 = points[num1*2 + 1];
+
+            x2 = points[num2*2];
+            y2 = points[num2*2 + 1];
+        }
+
+        num = get_num (i1, j1, m, p, q, d_x, d_y);
+        x1 = points[num*2];
+        y1 = points[num*2 + 1];
+
+        f1 = f(x1, y1);
+        f2 = f(x2, y2);
+        f3 = f(x3, y3);
+        g1 = 1;
+        g6 = 0;
+    }
+
+    if (!flag && j2!=j3 && ((i1 == p+d_x && j1 == q && j3 > j1) ||
+                            (i1 == p && j1 == q+d_y && j2 < j1)))
+        return;
+
+    x6 = x4 = (x1 + x2)/2;
+    y4 = y1;
+
+    x5 = x1;
+    y6 = y5 = (y1 + y3)/2;
+
+    f4 = f(x4, y4);
+    f5 = f(x5, y5);
+    f6 = f(x6, y6);
+
+    b[num] += s*(f5*g5 + f6*g6 + f3*g3)/48 + s*(f5*(g6+g3) + f6*(g5+g3) + f3*(g5+g6))/96;
+    b[num] += s*(f4*g4 + f2*g2 + f6*g6)/48 + s*(f4*(g2+g6) + f2*(g4+g6) + f6*(g4+g2))/96;
+    b[num] += s*(f4*g4 + f1*g1 + f6*g6)/48 + s*(f4*(g1+g6) + f1*(g4+g6) + f6*(g4+g1))/96;
+    b[num] += s*(f5*g5 + f6*g6 + f1*g1)/48 + s*(f5*(g6+g1) + f6*(g5+g1) + f1*(g5+g6))/96;
+
+//    ///debug
+//    printf ("\nnum = %d\n", num);
+
+    return;
+}
+
+/*
+///Vector b = (f, phi)
+void fill_vector_b (int n, int m, int p, int q,
                     int d_x, int d_y, double s,
                     double *b, double *func) {
 
     int A, B, C;
 
+   ///Single triangle
     for (int i = 0; i < n-1; ++i)
         for (int j = 0; j < m-1; ++j)
             if (!(i > (p-1) && i < p + d_x
@@ -446,7 +632,7 @@ void fill_vector_b (int n, int m, int p, int q,
                 b[C] += (  func[A] +   func[B] + 2*func[C])*s/24;
             }
 }
-
+*/
 ///Fill MSR matrix
 int assemble_matrix (int n, int m, int p, int q, int d_x, int d_y,
                      double s, int *I, double *A, int k, int t) {
@@ -464,10 +650,23 @@ int assemble_matrix (int n, int m, int p, int q, int d_x, int d_y,
 
     reduce_sum (t);
 
+//    ///debug
+//    for (int i = 0; i < n*m - (d_x-1)*(d_y-1) + 1 +
+//             ((n-2)*(m-2) - (d_x+1)*(d_y+1))*6
+//             + ((n-2) + (d_x-1) + (m-2) + (d_y-1))*4*2
+//             + 2*3 + 2*2 + 2*6 + 2*5; ++i) printf(" %d", I[i]);
+
     if (err)
         return -3;
 
     err = fill_matrix (n, m, p, q, d_x, d_y, s, I, A, k, t);
+
+//    ///debug
+//    printf("\n");
+//    for (int i = 0; i < n*m - (d_x-1)*(d_y-1) + 1 +
+//                 ((n-2)*(m-2) - (d_x+1)*(d_y+1))*6
+//                 + ((n-2) + (d_x-1) + (m-2) + (d_y-1))*4*2
+//                 + 2*3 + 2*2 + 2*6 + 2*5; ++i) printf(" %.2e ", A[i]);
 
     reduce_sum (t);
 

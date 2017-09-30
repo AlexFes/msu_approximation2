@@ -1,7 +1,7 @@
 #include "window.h"
 #include "algorithm.h"
 
-#define EPS 1e-15
+#define EPS 1e-16
 #define MAX_IT 5000
 static pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
 
@@ -72,7 +72,7 @@ int solve (int n, double *A, int *I, double *b, double *x, double eps,
     static double C1 = 0, C2 = 0;
 
     /// r = Ax - b => r = Ax, r -= 1 * b
-    matr_mult  (n, A, I, x, r, k, t);
+    //matr_mult  (n, A, I, x, r, k, t);
     sub_vect   (n, r, -1, b, k, t);
     c1 = scalar_p (n, r, r, k, t);
 
@@ -81,9 +81,9 @@ int solve (int n, double *A, int *I, double *b, double *x, double eps,
     pthread_mutex_unlock (&mutex);
     reduce_sum (t);
 
-    if (fabs (C1) < eps*eps && k == 0)
-        //return 0;
-        printf ("\nError solve\n");
+//    if (fabs (C1) < eps*eps && k == 0)
+//        //return 0;
+//        printf ("\nError solve\n");
 
     for (int it = 1; it < maxit; it++) {
         // u = D^(-1) * r
@@ -136,9 +136,13 @@ void *use_algorithm (void *arg) {
 
     double x1 = ar->x1, y1 = ar->y1,
            x2 = ar->x2, y2 = ar->y2;
+//    printf ("\n%f %f\n", x1, x2);
 
-    double hx = (x2-x1)/(n-1), hy = (y2-y1)/(m-1), s = hx*hy;
+//    double num_x = (double) (n-1),
+//           num_y = (double) (m-1);
 
+    double hx = (x2-x1)/(n-1), hy = (y2-y1)/(n-1), s = hx*hy;
+//printf ("\n%f\n", s);
     if (k == 0) {
         r = new double  [n*m - (d_x-1)*(d_y-1)];
         u = new double  [n*m - (d_x-1)*(d_y-1)];
@@ -153,14 +157,19 @@ void *use_algorithm (void *arg) {
     err = assemble_matrix (n, m, p, q, d_x, d_y, s,
                            ar->I, ar->A, k, t);
 
+    reduce_sum (t);
+
     if (err) {
         printf ("Cannot assemble matrix: error %d\n", err);
 
         return 0;
     }
 
-    if (k == 0)
-        fill_vector_b (n, m, p, q, d_x, d_y, s, ar->b, ar->func);
+    fill_vector_b (n, m, p, q, d_x, d_y, k, t, s,
+                   ar->b, ar->f, ar->points);
+
+//    if (k == 0)
+//        fill_vector_b (n, m, p, q, d_x, d_y, s, ar->b, ar->func);
 
     reduce_sum (t);
 

@@ -11,9 +11,10 @@ static double f_0 (double x, double y) {
     (void)y;
 
     //return 1;
-    //return exp (x*x - y*y);
+    return exp (x*x - y*y);
     //return sqrt (x*x + y*y);
     return x + y;
+    //return sin(M_PI*x)*sin(M_PI*y);
 }
 
 void Scene3D::paintGL () {

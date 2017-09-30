@@ -17,8 +17,9 @@ int Scene3D::input_values (int argc, char *argv[]) {
         return -3;
     }
 
-    x1 = y1 = 0;
-    x2 = y2 = 4;
+    x1 = y1 = -0.5;
+    x2 = y2 = 0.5;
+//    printf ("\n%f %f\n", x1, x2);
 
     n = 5;
     m = 5;

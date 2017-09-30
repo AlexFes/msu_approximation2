@@ -7,8 +7,6 @@
 ///Multithread
 void Scene3D::recount_algorithm () {
 
-    //get_cut(0.4, 0.3, 0.4, 0.5);
-
     pthread_t tid;
 
     update_arrays();
@@ -16,6 +14,7 @@ void Scene3D::recount_algorithm () {
     get_points ();
 
     args *arg = new args [t];
+//    printf ("\n%f %f\n", x1, x2);
 
     for (int i = 0; i < t; i++) {
         arg[i].A = A;
@@ -23,6 +22,8 @@ void Scene3D::recount_algorithm () {
         arg[i].b = b;
         arg[i].x = x;
         arg[i].func = func;
+        arg[i].points = points;
+        arg[i].f = f;
 
         arg[i].x1 = x1;
         arg[i].x2 = x2;
@@ -81,7 +82,7 @@ void Scene3D::fill_vertex_array (std::vector<GLfloat> &VertexArray,
     VertexArray.push_back (points[2*index1 + 1]);
 
     if (x)
-        VertexArray.push_back (1e+14*fabs(func[index1] - x[index1]));
+        VertexArray.push_back (fabs(func[index1] - x[index1]));
 
     else
         VertexArray.push_back (func[index1]);
@@ -90,7 +91,7 @@ void Scene3D::fill_vertex_array (std::vector<GLfloat> &VertexArray,
     VertexArray.push_back (points[2*index2 + 1]);
 
     if (x)
-        VertexArray.push_back (1e+14*fabs(func[index2] - x[index2]));
+        VertexArray.push_back (fabs(func[index2] - x[index2]));
 
     else
         VertexArray.push_back (func[index2]);
@@ -99,10 +100,59 @@ void Scene3D::fill_vertex_array (std::vector<GLfloat> &VertexArray,
     VertexArray.push_back (points[2*index3 + 1]);
 
     if (x)
-        VertexArray.push_back (1e+14*fabs(func[index3] - x[index3]));
+        VertexArray.push_back (fabs(func[index3] - x[index3]));
 
     else
         VertexArray.push_back (func[index3]);
+}
+
+void Scene3D::fill_vertex_array_half_points (std::vector<GLfloat> &VertexArray, int status,
+                                             int index1, int index2, int index3) {
+
+    double x1, x2;
+
+    x1 = (points[2 * index1] + points[2 * index2]) / 2;
+    x2 = (points[2 * index1 + 1] + points[2 * index2 + 1]) / 2;
+
+    VertexArray.push_back (x1);
+    VertexArray.push_back (x2);
+
+    if (status == 0)
+        VertexArray.push_back (f (x1, x2));
+
+    else if (status == 1)
+        VertexArray.push_back ((x[index1] + x[index2]) / 2);
+
+    else
+        VertexArray.push_back (fabs(f (x1, x2) - (x[index1] + x[index2]) / 2));
+
+    x1 = (points[2 * index1] + points[2 * index3]) / 2;
+    x2 = (points[2 * index1 + 1] + points[2 * index3 + 1]) / 2;
+
+    VertexArray.push_back (x1);
+    VertexArray.push_back (x2);
+
+    if (status == 0)
+        VertexArray.push_back (f (x1, x2));
+
+    else if (status == 1)
+        VertexArray.push_back ((x[index1] + x[index3]) / 2);
+
+    else
+        VertexArray.push_back (fabs(f (x1, x2) - (x[index1] + x[index3]) / 2));
+
+    x1 = (points[2 * index2] + points[2 * index3]) / 2;
+    x2 = (points[2 * index2 + 1] + points[2 * index3 + 1]) / 2;
+    VertexArray.push_back (x1);
+    VertexArray.push_back (x2);
+
+    if (status == 0)
+        VertexArray.push_back (f (x1, x2));
+
+    else if (status == 1)
+        VertexArray.push_back ((x[index2] + x[index3]) / 2);
+    else
+        VertexArray.push_back (fabs(f (x1, x2) - (x[index2] + x[index3]) / 2));
 }
 
 ///Get an array of points to draw
@@ -121,12 +171,14 @@ void Scene3D::getVertexArray (std::vector<GLfloat> &VertexArray,
                 index3 = get_num (i+1, j+1, m, p, q, d_x, d_y);
                 fill_vertex_array (VertexArray, x, func,
                                    index1, index2, index3);
+                fill_vertex_array_half_points (VertexArray, status, index1, index2, index3);
 
                 index1 = get_num (i, j, m, p, q, d_x, d_y);
                 index2 = get_num (i, j+1, m, p, q, d_x, d_y);
                 index3 = get_num (i+1, j+1, m, p, q, d_x, d_y);
                 fill_vertex_array (VertexArray, x, func,
                                    index1, index2, index3);
+                fill_vertex_array_half_points (VertexArray, status, index1, index2, index3);
             }
 
     double max = 0;
@@ -134,12 +186,15 @@ void Scene3D::getVertexArray (std::vector<GLfloat> &VertexArray,
     for (int i = 0; i < (int)VertexArray.size () / 9; i++)
         for (int j = 0; j < 9; j += 3)
             if (fabs (VertexArray[9 * i + 2 + j]) > max)
-                max = fabs (VertexArray[9 * i + 2]);
+                max = fabs (VertexArray[9 * i + 2 + j]);
 
     if (status == 2) {
+        for (int i = 0; i < (int)VertexArray.size () / 9; i++)
+            for (int j = 0; j < 9; j += 3)
+                VertexArray[9 * i + 2 + j]/=max;
+
         max_residual = max;
-        printf ("Max residual = %e\n", 1e-14*max_residual);
-        //qDebug() << "Max residual = " << max_residual;
+        printf ("Max residual = %e\n", max_residual);
     }
 }
 

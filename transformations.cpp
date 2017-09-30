@@ -114,8 +114,11 @@ void Scene3D::keyPressEvent(QKeyEvent* pe) {
             n/=2;
             p/=2;
             d_x/=2;
-            if (n < 5)
+            if (n < 5) {
+                p = 1;
+                d_x = 2;
                 n = 5;
+            }
             printf ("\nPoints = %d\n", n*m + (d_x-1)*(d_y-1));
             recount_algorithm();
             break;
@@ -136,8 +139,11 @@ void Scene3D::keyPressEvent(QKeyEvent* pe) {
             m/=2;
             q/=2;
             d_y/=2;
-            if (m < 5)
+            if (m < 5) {
+                q = 1;
+                d_y = 2;
                 m = 5;
+            }
             printf ("\nPoints = %d\n", n*m + (d_x-1)*(d_y-1));
             recount_algorithm();
             break;

@@ -42,12 +42,14 @@ private:
     void fill_vertex_array (std::vector<GLfloat> &VertexArray,
                             double *x, double *func,
                             int index1, int index2, int index3);
-
+    void fill_vertex_array_half_points (std::vector<GLfloat> &VertexArray, int status,
+                                                 int index1, int index2, int index3);
     void getVertexArray (std::vector<GLfloat> &VertexArray, double *func,
                          double *x, int status);
     void drawFigure ();
     void draw_points_in_nodes (std::vector<GLfloat> &VertexArray);
     void get_points ();
+    void get_cut(double X, double Y, double dX, double dY);
 
 protected:
     void initializeGL();
@@ -57,6 +59,7 @@ protected:
     void mouseMoveEvent(QMouseEvent* pe);
     void mouseReleaseEvent(QMouseEvent*);
     void wheelEvent(QWheelEvent* pe);
+    void keyPressEvent(QKeyEvent* pe);
 
 private:
     int t;      //threads

@@ -22,7 +22,10 @@ int main (int argc, char *argv[]) {
 
     draw_area.resize (500, 500);
     draw_area.show ();
+
     app.exec ();
+
+    delete window;
 
     return 0;
 }
