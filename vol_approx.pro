@@ -22,8 +22,7 @@ SOURCES += main.cpp\
     help_funcs.cpp \
     transformations.cpp
 
-HEADERS  += window.h \
-    algorithm.h
+HEADERS  += window.h
 
 
 QT += opengl
